@@ -7,9 +7,9 @@ Update this README every week.
 
 | Field | Value |
 |---|---|
-| Student Name | |
-| GitHub Username | |
-| Project Title | |
+| Student Name | Victor Valdivia Calatrava |
+| GitHub Username | Valdi183 |
+| Project Title | victor_valdivia_blockchain_dashboard |
 | Chosen AI Approach | |
 
 ## Module Tracking
