@@ -10,7 +10,7 @@ Update this README every week.
 | Student Name | Victor Valdivia Calatrava |
 | GitHub Username | Valdi183 |
 | Project Title | victor_valdivia_blockchain_dashboard |
-| Chosen AI Approach | |
+| Chosen AI Approach | Option 2 "Anomaly detector"|
 
 ## Module Tracking
 
@@ -18,24 +18,27 @@ Use one of these values: `Not started`, `In progress`, `Done`
 
 | Module | What it should include | Status |
 |---|---|---|
-| M1 | Proof of Work Monitor | Not started |
-| M2 | Block Header Analyzer | Not started |
-| M3 | Difficulty History | Not started |
-| M4 | AI Component | Not started |
+| M1 | Proof of Work Monitor | Done |
+| M2 | Block Header Analyzer | Done |
+| M3 | Difficulty History | Done |
+| M4 | AI Component | Done |
 
 ## Current Progress
 
 Write 3 to 5 short lines about what you have already done.
 
-- 
-- 
-- 
+I built a real-time Bitcoin blockchain dashboard using Streamlit, fetching live data from Blockstream and Blockchain.info through a custom API client with
+retry logic and TTL caching. M1 decodes the compact bits field into a full 256-bit target and plots inter-arrival time distributions against a theoretical
+exponential PDF. M2 independently verifies block hashes using only Python's hashlib, parsing all 6 raw header fields with correct byte-order handling. M3
+charts two years of difficulty history with per-period adjustment markers, while M4 detects anomalous blocks by fitting an exponential distribution to inter
+arrival times and flagging statistical outliers via p-values. The dashboard auto-refreshes every 60 seconds and falls back to cached data gracefully on API
+failure.
 
 ## Next Step
 
 Write the next small step you will do before the next class.
 
-- 
+- I am planning to incorporate more functionalities to the program
 
 ## Main Problem or Blocker
 
