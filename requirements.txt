@@ -1,4 +1,7 @@
+streamlit
+streamlit-autorefresh
 requests
 pandas
 plotly
-streamlit
+numpy
+scipy
