@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 BLOCKSTREAM_BASE = "https://blockstream.info/api"
-BLOCKCHAIN_INFO_BASE = "https://blockchain.info"
+MEMPOOL_BASE = "https://mempool.space/api"
 
 CACHE_TTL_SECONDS = 60          # re-fetch at most once per minute
 REQUEST_TIMEOUT = 10            # seconds per individual HTTP call
@@ -100,7 +100,13 @@ def _cached_get(url: str, raw: bool = False) -> Any:
     except requests.RequestException as exc:
         raise BlockchainAPIError(f"Request failed for {url}: {exc}") from exc
 
-    value = resp.content if raw else resp.json()
+    if raw:
+        value = resp.content
+    else:
+        try:
+            value = resp.json()
+        except ValueError as exc:
+            raise BlockchainAPIError(f"Non-JSON response from {url}: {exc}") from exc
     _cache[url] = (now, value)
     return value
 
@@ -189,16 +195,15 @@ def get_difficulty_history() -> pd.DataFrame:
 
     Columns: timestamp (datetime64), difficulty (float64).
 
-    Data source: blockchain.info charts API — no API key required.
-    The timespan=2years parameter limits to the last two years so the
-    chart stays readable.
+    Data source: mempool.space mining hashrate endpoint, which includes
+    one difficulty data point per adjustment epoch (every 2016 blocks).
     """
-    url = (
-        f"{BLOCKCHAIN_INFO_BASE}/charts/difficulty"
-        "?format=json&timespan=2years&sampled=true&cors=true"
-    )
+    url = f"{MEMPOOL_BASE}/v1/mining/hashrate/2y"
     data = _cached_get(url)
-    values = data.get("values", [])
-    df = pd.DataFrame(values, columns=["timestamp", "difficulty"])
+    difficulty_points = data.get("difficulty", [])
+    if not difficulty_points:
+        raise BlockchainAPIError("No difficulty data in mempool.space response")
+    df = pd.DataFrame(difficulty_points)[["time", "difficulty"]]
+    df = df.rename(columns={"time": "timestamp"})
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="s")
     return df
