@@ -15,6 +15,12 @@ Architecture:
 """
 
 import datetime
+import sys
+from pathlib import Path
+
+# Ensure the project root (directory containing app.py) is always in sys.path
+# regardless of the working directory from which streamlit is launched.
+sys.path.insert(0, str(Path(__file__).parent))
 
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
