@@ -75,15 +75,15 @@ template-blockchain-dashboard/
 
 ### Kick-off Review
 
-Review time: 2026-04-16 09:59 CEST
-Status: Amber
+Review time: 2026-04-29 20:44 CEST
+Status: Green
 
 Strength:
-- Your repository keeps the expected classroom structure.
+- I can see the dashboard structure integrating the checkpoint modules.
 
 Improve now:
-- The README is present but still misses part of the required kickoff information.
+- M1 still needs clearer evidence of a working Proof of Work monitor in the dashboard.
 
 Next step:
-- Complete the README fields for student information, AI approach, module status, and next step.
+- Turn M1 into a working dashboard view with live Proof of Work metrics, not just a placeholder.
 <!-- student-repo-auditor:teacher-feedback:end -->
