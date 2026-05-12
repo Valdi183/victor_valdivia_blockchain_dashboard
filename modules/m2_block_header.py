@@ -119,10 +119,12 @@ def verify_pow(raw_header: bytes) -> dict:
     # Step 2: Reverse to obtain the conventional big-endian display hash.
     hash_display = hash_internal[::-1].hex()              # 64 hex chars
 
-    # Step 3: Count leading zero BITS (not just hex nibbles) in the
-    # internal-order hash, because that is the actual integer value being
-    # compared against the target.
-    leading_zero_bits = count_leading_zero_bits(hash_internal)
+    # Step 3: Count leading zero BITS in the hash as it appears in
+    # conventional display (big-endian) order — i.e. the byte-reversed form.
+    # hash_internal[0] is the LAST byte of the display hash, so counting
+    # zeros on hash_internal directly would give ~0 for a valid block.
+    # We reverse to match the display order where leading zeros are visible.
+    leading_zero_bits = count_leading_zero_bits(hash_internal[::-1])
 
     # Step 4: Decode the target from `bits` (parsed from the header).
     bits_val, = struct.unpack_from("<I", raw_header, 72)

@@ -41,6 +41,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from scipy import stats
 
 from api.blockchain_client import BlockchainAPIError, get_last_n_blocks
 
@@ -298,28 +299,95 @@ def render() -> None:
         st.info("Fewer than 2 anomalies — no clustering analysis possible.")
 
     # ------------------------------------------------------------------
+    # Model evaluation — Kolmogorov-Smirnov goodness-of-fit test
+    # ------------------------------------------------------------------
+    # The KS test compares the empirical CDF of observed inter-arrivals
+    # against the theoretical CDF of Exp(λ_hat).  A high p-value means
+    # the data are consistent with the exponential null model; a low
+    # p-value suggests hash-rate variability or pool behaviour is
+    # creating deviations from the simple Poisson assumption.
+    st.subheader("📐 Model Evaluation — Goodness-of-Fit")
+
+    arr_vals = df["inter_arrival"].values
+
+    # scipy.stats.kstest with a lambda that evaluates the fitted CDF.
+    # We pass the CDF of Exp(lambda_hat) directly as a callable.
+    ks_stat, ks_pvalue = stats.kstest(
+        arr_vals,
+        lambda x: 1.0 - np.exp(-lambda_hat * x),   # CDF of Exp(λ_hat)
+    )
+
+    # Mean Absolute Error: average deviation of each observed gap from
+    # the model's expected value (1/λ = mean_arrival).
+    mae = float(np.mean(np.abs(arr_vals - mean_arrival)))
+
+    # Log-likelihood of the fitted exponential model on the observed data.
+    # For Exp(λ): log-likelihood = n·log(λ) − λ·Σtᵢ
+    log_likelihood = len(arr_vals) * math.log(lambda_hat) - lambda_hat * arr_vals.sum()
+
+    col_e1, col_e2, col_e3 = st.columns(3)
+    col_e1.metric(
+        "KS statistic",
+        f"{ks_stat:.4f}",
+        help="Kolmogorov-Smirnov distance between empirical and fitted CDF. Closer to 0 = better fit.",
+    )
+    col_e2.metric(
+        "KS p-value",
+        f"{ks_pvalue:.4f}",
+        help="p > 0.05 → data are consistent with the exponential model.",
+    )
+    col_e3.metric(
+        "MAE vs model mean",
+        f"{mae:.1f} s",
+        help="Mean absolute deviation of observed gaps from the fitted mean (1/λ).",
+    )
+
+    if ks_pvalue > 0.05:
+        st.success(
+            f"✅ KS p-value = {ks_pvalue:.4f} > 0.05 — inter-arrival times are "
+            "consistent with the Exponential(λ) null model."
+        )
+    else:
+        st.warning(
+            f"⚠️ KS p-value = {ks_pvalue:.4f} ≤ 0.05 — the data deviate from the "
+            "pure exponential model, likely due to hash-rate variability or "
+            "mining-pool effects during this window."
+        )
+
+    st.divider()
+
+    # ------------------------------------------------------------------
     # Model explanation
     # ------------------------------------------------------------------
-    with st.expander("🔬 Statistical methodology"):
+    with st.expander("🔬 Statistical methodology & evaluation details"):
         st.markdown(
-            r"""
+            rf"""
 **Null model:** Inter-arrival times are i.i.d. Exponential(λ) where
-λ = 1/mean(observed gaps).
+λ̂ = 1/mean(observed gaps) (Maximum Likelihood Estimator).
 
 **Anomaly criterion:**
 - `p_value = exp(−λ × t)` = probability of a gap ≥ t under null model.
 - Flag if `p_value < 0.01` (rare long gap) **or** `t < 60 s` (very fast).
 
-**Evaluation metrics:**
-| Metric | Value |
-|---|---|
-| Anomaly rate | $(n_{anomalies} / n_{total}) \times 100\%$ |
-| Expected rate (null) | $\approx 1\% + P(T < 60s)$ |
-| Model: | Exponential MLE |
+**Computed evaluation metrics (this window):**
+| Metric | Value | Interpretation |
+|---|---|---|
+| Fitted λ⁻¹ | {mean_arrival:.1f} s | MLE mean; ideal = 600 s |
+| MAE vs model | {mae:.1f} s | Avg absolute deviation from {mean_arrival:.0f} s |
+| KS statistic | {ks_stat:.4f} | Empirical vs fitted CDF distance |
+| KS p-value | {ks_pvalue:.4f} | {'Consistent with Exp model ✅' if ks_pvalue > 0.05 else 'Significant deviation ⚠️'} |
+| Log-likelihood | {log_likelihood:.1f} | Higher = better fit |
+| Anomaly rate | {anomaly_rate:.1f}% | Observed ({n_anom}/{len(df)}) |
+| Expected anomaly rate | {expected_anomaly_rate:.1f}% | Under null model |
+
+**Why KS test?** For unsupervised anomaly detection there are no ground-truth
+labels, so precision/recall/AUC cannot be computed directly. The KS test
+evaluates the distributional assumption (exponential model) that underlies
+the anomaly criterion — it is the most appropriate formal metric here.
 
 **Limitations:**
 1. Assumes constant hash rate — invalid during difficulty transitions.
-2. Only 200 blocks ≈ 33 hours of data; longer windows reduce false positives.
+2. Only {len(blocks)} blocks ≈ {len(blocks)*10//60} hours of data; longer windows reduce false positives.
 3. The exponential model treats all miners as a single aggregate process;
    real mining pools introduce short-range correlations.
             """

@@ -107,12 +107,13 @@ def render() -> None:
         )
     )
 
-    # Add vertical markers at every adjustment (every data point is one epoch).
+    # Add vertical markers at every adjustment epoch (one per 2016-block period).
+    # Opacity raised to 0.25 so they are visible without drowning the main line.
     for _, row in df.iterrows():
         fig.add_vline(
             x=row["timestamp"],
             line_dash="dot",
-            line_color="rgba(255,255,255,0.08)",
+            line_color="rgba(255,255,255,0.25)",
             line_width=1,
         )
 
