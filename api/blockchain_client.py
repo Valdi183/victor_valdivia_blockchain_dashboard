@@ -189,6 +189,48 @@ def get_last_n_blocks(n: int = 50) -> list[dict]:
     return results[:n]
 
 
+def get_block_txids(block_hash: str) -> list[str]:
+    """
+    Return all txids in a block in display (big-endian) order.
+
+    Blockstream returns the complete txid list in one call.
+    Each txid is a 64-hex-char string — the bytes must be reversed before
+    hashing when building the Merkle tree (internal/little-endian order).
+    """
+    return _cached_get(f"{BLOCKSTREAM_BASE}/block/{block_hash}/txids")
+
+
+def get_fee_rates_history(period: str = "1w") -> pd.DataFrame:
+    """
+    Return per-period median fee rates (sat/vByte) from mempool.space.
+
+    Endpoint: /v1/mining/blocks/fee-rates/{period}
+    Columns of interest: timestamp (datetime64), avgFee_50 (median sat/vByte),
+    avgFee_25, avgFee_75 (quartiles for volatility analysis).
+    """
+    url = f"{MEMPOOL_BASE}/v1/mining/blocks/fee-rates/{period}"
+    data = _cached_get(url)
+    if not data:
+        raise BlockchainAPIError("No fee rate data returned from mempool.space")
+    df = pd.DataFrame(data)
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="s")
+    return df
+
+
+def get_recommended_fees() -> dict:
+    """
+    Return current recommended fee tiers from mempool.space.
+
+    Keys: fastestFee, halfHourFee, hourFee, economyFee, minimumFee (sat/vByte).
+    """
+    return _cached_get(f"{MEMPOOL_BASE}/v1/fees/recommended")
+
+
+def get_mempool_info() -> dict:
+    """Return current mempool statistics (count, vsize bytes, total fees)."""
+    return _cached_get(f"{MEMPOOL_BASE}/mempool")
+
+
 def get_difficulty_history() -> pd.DataFrame:
     """
     Return historical Bitcoin difficulty as a DataFrame.
