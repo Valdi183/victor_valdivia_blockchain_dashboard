@@ -30,6 +30,8 @@ CryptoChain Analyzer is a real-time Bitcoin blockchain dashboard built with Stre
 | M6 | Security Score (51% Attack Cost) | ✅ Complete |
 | M7 | Second AI Approach — Fee Estimator | ✅ Complete |
 
+✅ Project completed
+
 ## How to Run
 
 ```bash
