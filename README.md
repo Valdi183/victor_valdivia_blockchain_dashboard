@@ -1,50 +1,34 @@
-# Blockchain Dashboard Project
-
-Use this repository to build your blockchain dashboard project.
-Update this README every week.
+# CryptoChain Analyzer Dashboard
 
 ## Student Information
 
 | Field | Value |
 |---|---|
-| Student Name | Victor Valdivia Calatrava |
+| Name | Victor Valdivia Calatrava |
 | GitHub Username | Valdi183 |
-| Project Title | victor_valdivia_blockchain_dashboard |
-| Chosen AI Approach | Option 2 "Anomaly detector"|
+| Course | Cryptography — Universidad Alfonso X el Sabio |
+| Professor | Jorge Calvo — Academic Year 2025–26 |
 
-## Module Tracking
+## Project Description
 
-Use one of these values: `Not started`, `In progress`, `Done`
+CryptoChain Analyzer is a real-time Bitcoin blockchain dashboard built with Streamlit that fetches live data from the Blockstream and Mempool.space public APIs. It implements seven modules covering core cryptographic concepts (Proof of Work, block header parsing, Merkle trees, difficulty adjustment, 51% attack cost) and two independent AI approaches (statistical anomaly detection and supervised fee-rate prediction). The dashboard auto-refreshes every 60 seconds and falls back gracefully to cached data on API failure.
 
-| Module | What it should include | Status |
-|---|---|---|
-| M1 | Proof of Work Monitor | Done |
-| M2 | Block Header Analyzer | Done |
-| M3 | Difficulty History | Done |
-| M4 | AI Component | Done |
+## Chosen AI Approaches
 
-## Current Progress
+- **M4:** Unsupervised statistical anomaly detector — fits an Exponential(λ) model to Bitcoin inter-arrival times by MLE and flags blocks whose survival probability falls below 1% as statistically rare events.
+- **M7:** Supervised Gradient Boosting Regressor — predicts the next period's median transaction fee (sat/vByte) from lag features and time-of-day patterns derived from mempool.space fee rate history.
 
-Write 3 to 5 short lines about what you have already done.
+## Module Status
 
-I built a real-time Bitcoin blockchain dashboard using Streamlit, fetching live data from Blockstream and Blockchain.info through a custom API client with
-retry logic and TTL caching. M1 decodes the compact bits field into a full 256-bit target and plots inter-arrival time distributions against a theoretical
-exponential PDF. M2 independently verifies block hashes using only Python's hashlib, parsing all 6 raw header fields with correct byte-order handling. M3
-charts two years of difficulty history with per-period adjustment markers, while M4 detects anomalous blocks by fitting an exponential distribution to inter
-arrival times and flagging statistical outliers via p-values. The dashboard auto-refreshes every 60 seconds and falls back to cached data gracefully on API
-failure.
-
-## Next Step
-
-Write the next small step you will do before the next class.
-
-- I am planning to incorporate more functionalities to the program
-
-## Main Problem or Blocker
-
-Write here if you are stuck with something.
-
-- 
+| Module | Title | Status |
+|--------|-------|--------|
+| M1 | Proof of Work Monitor | ✅ Complete |
+| M2 | Block Header Analyzer | ✅ Complete |
+| M3 | Difficulty History | ✅ Complete |
+| M4 | AI Component — Anomaly Detector | ✅ Complete |
+| M5 | Merkle Proof Verifier | ✅ Complete |
+| M6 | Security Score (51% Attack Cost) | ✅ Complete |
+| M7 | Second AI Approach — Fee Estimator | ✅ Complete |
 
 ## How to Run
 
@@ -57,33 +41,28 @@ streamlit run app.py
 
 ```text
 template-blockchain-dashboard/
-|-- README.md
-|-- requirements.txt
-|-- .gitignore
-|-- app.py
-|-- api/
-|   `-- blockchain_client.py
-`-- modules/
-    |-- m1_pow_monitor.py
-    |-- m2_block_header.py
-    |-- m3_difficulty_history.py
-    `-- m4_ai_component.py
+├── app.py                        # Streamlit entry point (7 tabs, auto-refresh 60 s)
+├── requirements.txt
+├── README.md
+├── api/
+│   └── blockchain_client.py      # HTTP client — Blockstream + Mempool.space APIs
+├── modules/
+│   ├── m1_proof_of_work.py       # bits decoding, difficulty, inter-arrival histogram
+│   ├── m2_block_header.py        # 80-byte header parser, local PoW verification
+│   ├── m3_difficulty_history.py  # 2-year difficulty chart, DAA epoch markers
+│   ├── m4_ai_component.py        # Exponential MLE anomaly detector (KS evaluation)
+│   ├── m5_merkle_proof.py        # Full Merkle tree + inclusion proof verifier
+│   ├── m6_security_score.py      # 51% attack cost + Nakamoto §11 probability
+│   └── m7_fee_estimator.py       # Gradient Boosting fee regression (MAE, RMSE, R²)
+└── report/
+    ├── report.md                 # Technical report (source)
+    └── report.pdf                # Technical report (rendered)
 ```
 
-<!-- student-repo-auditor:teacher-feedback:start -->
-## Teacher Feedback
+## External References
 
-### Kick-off Review
+Nakamoto, S. (2008). *Bitcoin: A Peer-to-Peer Electronic Cash System*. https://bitcoin.org/bitcoin.pdf
 
-Review time: 2026-04-29 20:44 CEST
-Status: Green
+Blockstream API Documentation. *Blockstream Explorer API*. https://blockstream.info/api
 
-Strength:
-- I can see the dashboard structure integrating the checkpoint modules.
-
-Improve now:
-- M1 still needs clearer evidence of a working Proof of Work monitor in the dashboard.
-
-Next step:
-- Turn M1 into a working dashboard view with live Proof of Work metrics, not just a placeholder.
-<!-- student-repo-auditor:teacher-feedback:end -->
+Mempool.space API Documentation. *Mempool.space API*. https://mempool.space/api
