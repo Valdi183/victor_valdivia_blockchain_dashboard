@@ -25,7 +25,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
-from modules import m1_proof_of_work, m2_block_header, m3_difficulty_history, m4_ai_component
+from modules import (
+    m1_proof_of_work,
+    m2_block_header,
+    m3_difficulty_history,
+    m4_ai_component,
+    m5_merkle_proof,
+    m6_security_score,
+    m7_fee_estimator,
+)
 
 # ---------------------------------------------------------------------------
 # Page config — must be the first Streamlit call
@@ -84,12 +92,15 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 # Main tabs
 # ---------------------------------------------------------------------------
-tab1, tab2, tab3, tab4 = st.tabs(
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
     [
         "⛏️ M1 — Proof of Work",
         "🔍 M2 — Block Header",
         "📈 M3 — Difficulty History",
         "🤖 M4 — Anomaly Detector",
+        "🌿 M5 — Merkle Proof",
+        "🛡️ M6 — Security Score",
+        "💸 M7 — Fee Estimator",
     ]
 )
 
@@ -104,3 +115,12 @@ with tab3:
 
 with tab4:
     m4_ai_component.render()
+
+with tab5:
+    m5_merkle_proof.render()
+
+with tab6:
+    m6_security_score.render()
+
+with tab7:
+    m7_fee_estimator.render()
